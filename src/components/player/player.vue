@@ -302,6 +302,7 @@
 				});
 				this.setCurrentIndex(index);
 			},
+			// 获取歌词
 			getLyric() {
 				this.currentSong.getLyric().then((lyric) => {
 					this.currentLyric = new Lyric(lyric, this.handleLyric);
@@ -314,6 +315,7 @@
 					this.currentLineNum = 0;
 				});
 			},
+			// 歌词滚动到相应位置
 			handleLyric({lineNum, txt}) {
 				this.currentLineNum = lineNum;
 				if (lineNum > 5) {
@@ -326,6 +328,8 @@
 			},
 			middleTouchStart(e) {
 				this.touch.initial = true;
+				// 判断是否是移动
+				this.touch.moved = false;
 				this.touch.startX = e.touches[0].pageX;
 				this.touch.startY = e.touches[0].pageY;
 			},
@@ -338,6 +342,11 @@
 				if (Math.abs(deltaY) > Math.abs(deltaX)) {
 					return;
 				}
+				// 当在y方向移动大于x方向时this.touch.moved依旧为false
+				if (!this.touch.moved) {
+					this.touch.moved = true;
+				}
+
 				const left = this.currentShow === 'cd' ? 0 : -window.innerWidth;
 				const width = Math.min(0, Math.max(-window.innerWidth, left + deltaX));
 				this.touch.percent = Math.abs(width / window.innerWidth);
@@ -347,6 +356,11 @@
 				this.$refs.middle.style.transition = ``;
 			},
 			middleTouchEnd(e) {
+				// 当在y方向移动大于x方向时this.touch.moved依旧为false  解决在y方向滑动时抬起手指或者鼠标歌词向x方向移动的bug
+				if (!this.touch.moved) {
+					return;
+				}
+
 				let width = 0;
 				let opacity = 0;
 				if (this.currentShow === 'cd') {
