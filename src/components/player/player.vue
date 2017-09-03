@@ -88,11 +88,12 @@
 						<i class="icon-mini" :class="minPlayIcon" @click.stop="togglePlay"></i>
 					</progress-circle>
 				</div>
-				<div class="control">
+				<div class="control" @click.stop="showPlaylist">
 					<i class="icon-playlist"></i>
 				</div>
 			</div>
 		</transition>
+		<playlist ref="playlist"></playlist>
 		<audio :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end" ref="audio"></audio>
 	</div>
 </template>
@@ -102,15 +103,17 @@
 	import animations from 'create-keyframe-animation';
 	import {prefixStyle} from 'common/js/dom';
 	import {PlayMode} from 'common/js/config';
-	import {shuffle} from 'common/js/util';
 	import ProgressBar from 'base/progress-bar/progress-bar';
 	import ProgressCircle from 'base/progress-circle/progress-circle';
 	import Lyric from 'lyric-parser';
 	import Scroll from 'base/scroll/scroll';
+	import Playlist from 'components/playlist/playList';
+	import {playerMixin} from 'common/js/mixin';
 
 	const transform = prefixStyle('transform');
 
 	export default {
+		mixins: [playerMixin],
 		data() {
 			return {
 				songReady: false,
@@ -140,17 +143,10 @@
 			percent() {
 				return this.currentTime / this.currentSong.duration;
 			},
-			iconPlayMode() {
-				return this.mode === PlayMode.sequence ? 'icon-sequence' : this.mode === PlayMode.loop ? 'icon-loop' : 'icon-random';
-			},
 			...mapGetters([
 				'fullScreen',
-				'playList',
-				'currentSong',
 				'playing',
-				'currentIndex',
-				'mode',
-				'sequenceList'
+				'currentIndex'
 			])
 		},
 		methods: {
@@ -284,24 +280,6 @@
 					this.currentLyric.seek(currentTime * 1000);
 				}
 			},
-			changePlayMode() {
-				const mode = (this.mode + 1) % 3;
-				this.setPlayMode(mode);
-				let list = null;
-				if (mode === PlayMode.random) {
-					list = shuffle(this.sequenceList);
-				} else {
-					list = this.sequenceList;
-				}
-				this.resetCurrentIndex(list);
-				this.setPlayList(list);
-			},
-			resetCurrentIndex(list) {
-				let index = list.findIndex((item) => {
-					return item.id === this.currentSong.id;
-				});
-				this.setCurrentIndex(index);
-			},
 			// 获取歌词
 			getLyric() {
 				this.currentSong.getLyric().then((lyric) => {
@@ -388,6 +366,9 @@
 				this.$refs.middle.style.opacity = opacity;
 				this.$refs.middle.style.transition = `${time}ms`;
 			},
+			showPlaylist() {
+				this.$refs.playlist.show();
+			},
 			_pad(num, n = 2) {
 				let len = num.toString().length;
 				while (len < n) {
@@ -408,15 +389,14 @@
 				return {x, y, scale};
 			},
 			...mapMutations({
-				setFullScreen: 'SET_FULL_SCREEN',
-				setPlayingState: 'SET_PLAYING_STATE',
-				setCurrentIndex: 'SET_CURRENT_INDEX',
-				setPlayMode: 'SET_PLAY_MODE',
-				setPlayList: 'SET_PLAY_LIST'
+				setFullScreen: 'SET_FULL_SCREEN'
 			})
 		},
 		watch: {
 			currentSong(newSong, oldSong) {
+				if (!newSong.id) {
+					return;
+				}
 				if (newSong.id === oldSong.id) {
 					return;
 				}
@@ -439,7 +419,8 @@
 		components: {
 			ProgressBar,
 			ProgressCircle,
-			Scroll
+			Scroll,
+			Playlist
 		}
 	};
 </script>
