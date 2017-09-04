@@ -11,7 +11,7 @@
 						</span>
 					</h1>
 				</div>
-				<scroll class="list-content" :data="sequenceList" ref="listContent">
+				<scroll class="list-content" :data="sequenceList" ref="listContent" :refreshDelay="refreshDelay">
 					<transition-group tag="ul" name="list">
 						<li class="item" :key="item.id" v-for="(item, index) in sequenceList" @click="selectItem(item, index)" ref="listItem">
 							<i class="current" :class="getCurrentIcon(item)"></i>
@@ -26,7 +26,7 @@
 					</transition-group>
 				</scroll>
 				<div class="list-operate">
-					<div class="add">
+					<div class="add" @click="addSong">
 						<i class="icon-add"></i>
 						<span class="text">添加歌曲到队列</span>
 					</div>
@@ -36,6 +36,7 @@
 				</div>
 			</div>
 			<confirm text="是否清空播放列表" confirmBtnText="清空" ref="confirm" @confirm="confirmClear"></confirm>
+			<add-song ref="addSong"></add-song>
 		</div>
 	</transition>
 </template>
@@ -46,12 +47,14 @@
 	import {PlayMode} from 'common/js/config';
 	import Confirm from 'base/confirm/confirm';
 	import {playerMixin} from 'common/js/mixin';
+	import AddSong from 'components/add-song/add-song';
 
 	export default {
 		mixins: [playerMixin],
 		data() {
 			return {
-				showFlag: false
+				showFlag: false,
+				refreshDelay: 100
 			};
 		},
 		computed: {
@@ -104,6 +107,9 @@
 				this.deleteSongList();
 				this.hide();
 			},
+			addSong() {
+				this.$refs.addSong.show();
+			},
 			...mapActions([
 				'deleteSong',
 				'deleteSongList'
@@ -119,7 +125,8 @@
 		},
 		components: {
 			Scroll,
-			Confirm
+			Confirm,
+			AddSong
 		}
 	};
 </script>
