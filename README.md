@@ -1,6 +1,6 @@
 # webapp-music
 
->  音乐播发器
+>  音乐播放器
 
 ## Build Setup
 
