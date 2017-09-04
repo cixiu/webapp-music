@@ -94,7 +94,7 @@
 			</div>
 		</transition>
 		<playlist ref="playlist"></playlist>
-		<audio :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end" ref="audio"></audio>
+		<audio :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end" ref="audio"></audio>
 	</div>
 </template>
 
@@ -225,6 +225,7 @@
 				}
 				if (this.playList.length === 1) {
 					this.loop();
+					return;
 				} else {
 					let index = this.currentIndex + 1;
 					if (index === this.playList.length) {
@@ -284,6 +285,9 @@
 			// 获取歌词
 			getLyric() {
 				this.currentSong.getLyric().then((lyric) => {
+					if (this.currentSong.lyric !== lyric) {
+						return;
+					}
 					this.currentLyric = new Lyric(lyric, this.handleLyric);
 					if (this.playing) {
 						this.currentLyric.play();

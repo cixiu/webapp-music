@@ -1,7 +1,7 @@
 {
   "name": "webapp-music",
   "version": "1.0.0",
-  "description": " 音乐播发器",
+  "description": " 音乐播放器",
   "author": "cixiu <cheng597604817@qq.com>",
   "private": true,
   "scripts": {
